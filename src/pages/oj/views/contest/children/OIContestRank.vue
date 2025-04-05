@@ -78,7 +78,7 @@
                     this.$router.push(
                       {
                         name: 'user-home',
-                        query: {username: params.row.user.username}
+                        query: { username: params.row.user.username }
                       })
                   }
                 }
@@ -94,68 +94,93 @@
                   click: () => {
                     this.$router.push({
                       name: 'contest-submission-list',
-                      query: {username: params.row.user.username}
+                      query: { username: params.row.user.username }
                     })
                   }
                 }
               }, params.row.total_score)
             }
+          },
+          // modify the table fields (by wtf)
+          {
+            title: 'Runtime (ms)',
+            align: 'center',
+            render: (h, params) => {
+              return h('a', {
+                style: { color: '#57a3f3', cursor: 'pointer' },
+                on: {
+                  click: () => {
+                    this.$router.push({
+                      name: 'submission-details',
+                      params: { id: params.row.submission_id }
+                    })
+                  }
+                }
+              }, params.row.runtime)
+            }
+          },
+          {
+            title: 'Memory (GB)',
+            align: 'center',
+            render: (h, params) => {
+                return h('a', {
+                  style: { color: '#57a3f3', cursor: 'pointer' },
+                  on: {
+                    click: () => {
+                      this.$router.push({
+                        name: 'submission-details',
+                        params: { id: params.row.submission_id }
+                      })
+                    }
+                  }
+                }, (params.row.memory / 1024 / 1024).toFixed(2))
+            }
           }
         ],
         dataRank: [],
+        // modify the chart options (by wtf)
         options: {
           title: {
-            text: this.$i18n.t('m.Top_10_Teams'),
-            left: 'center'
+            text: 'AI Contest Top 10',
+            left: 'left'
+          },
+          legend: {
+            data: ['Runtime', 'Memory'],
+            top: 'top'
           },
           tooltip: {
-            trigger: 'axis'
-          },
-          toolbox: {
-            show: true,
-            feature: {
-              dataView: {show: true, readOnly: true},
-              magicType: {show: true, type: ['line', 'bar']},
-              saveAsImage: {show: true}
-            },
-            right: '10%'
-          },
-          calculable: true,
-          xAxis: [
-            {
-              type: 'category',
-              data: ['root'],
-              boundaryGap: true,
-              axisLabel: {
-                interval: 0,
-                showMinLabel: true,
-                showMaxLabel: true,
-                align: 'center',
-                formatter: (value, index) => {
-                  return utils.breakLongWords(value, 14)
-                }
-              },
-              axisTick: {
-                alignWithLabel: true
-              }
+            trigger: 'axis',
+            axisPointer: {
+              type: 'shadow'
             }
-          ],
-          yAxis: [
-            {
-              type: 'value'
-            }
-          ],
+          },
+          grid: {
+            left: '10%',
+            right: '10%',
+            bottom: '10%',
+            top: '20%',
+            containLabel: true
+          },
+          xAxis: {
+            type: 'value',
+            boundaryGap: [0, 0.01]
+          },
+          yAxis: {
+            type: 'category',
+            data: []
+          },
           series: [
             {
-              name: this.$i18n.t('m.Score'),
+              name: 'Runtime',
               type: 'bar',
-              barMaxWidth: '80',
-              data: [0],
-              markPoint: {
-                data: [
-                  {type: 'max', name: 'max'}
-                ]
-              }
+              data: [],
+              label: {
+                show: true,
+                position: 'right',
+                formatter: '{c} ms',
+                color: '#000',
+                fontSize: 12
+              },
             }
           ]
         }
@@ -174,16 +199,15 @@
     },
     methods: {
       ...mapActions(['getContestProblems']),
-      applyToChart (rankData) {
-        let [usernames, scores] = [[], []]
-        rankData.forEach(ele => {
-          usernames.push(ele.user.username)
-          scores.push(ele.total_score)
-        })
-        this.options.xAxis[0].data = usernames
-        this.options.series[0].data = scores
+      // modify the applyToChart function to fit the new chart  (by wtf)
+      applyToChart(rankData) {
+        const usernames = rankData.map(ele => ele.user.username)
+        const runtimes = rankData.map(ele => ele.runtime)
+
+        this.options.yAxis.data = usernames
+        this.options.series[0].data = runtimes
       },
-      applyToTable (data) {
+      applyToTable(data) {
         // deepcopy
         let dataRank = JSON.parse(JSON.stringify(data))
         // 从submission_info中取出相应的problem_id 放入到父object中,这么做主要是为了适应iview table的data格式
@@ -193,6 +217,9 @@
           Object.keys(info).forEach(problemID => {
             dataRank[i][problemID] = info[problemID]
           })
+          // add runtime and memory to the parent object (by wtf)
+          dataRank[i].runtime = rank.runtime
+          dataRank[i].memory = rank.memory
         })
         this.dataRank = dataRank
       },
