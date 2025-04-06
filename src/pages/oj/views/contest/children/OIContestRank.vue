@@ -120,7 +120,7 @@
             }
           },
           {
-            title: 'Memory (GB)',
+            title: 'Memory (MB)',
             align: 'center',
             render: (h, params) => {
                 return h('a', {
@@ -145,8 +145,17 @@
             left: 'left'
           },
           legend: {
-            data: ['Runtime', 'Memory'],
-            top: 'top'
+            data: [
+              'Total Score [pts]',
+              'Runtime [ms]',
+              'Memory [MB]'
+            ],
+            top: 'top',
+            selected: {
+              'Total Score [pts]': false,
+              'Runtime [ms]': true,
+              'Memory [MB]': true,
+            }
           },
           tooltip: {
             trigger: 'axis',
@@ -163,22 +172,40 @@
           },
           xAxis: {
             type: 'value',
-            boundaryGap: [0, 0.01]
+            min: 0,
           },
           yAxis: {
             type: 'category',
-            data: []
+            data: [],
+            inverse: true
           },
           series: [
             {
-              name: 'Runtime',
+              name: 'Total Score [pts]',
+              type: 'bar',
+              label: {
+                show: true,
+                position: 'right',
+                fontSize: 12,
+              }
+            },
+            {
+              name: 'Runtime [ms]',
               type: 'bar',
               data: [],
               label: {
                 show: true,
                 position: 'right',
-                formatter: '{c} ms',
-                color: '#000',
+                fontSize: 12
+              },
+            },
+            {
+              name: 'Memory [MB]',
+              type: 'bar',
+              data: [],
+              label: {
+                show: true,
+                position: 'right',
                 fontSize: 12
               },
             }
@@ -202,10 +229,14 @@
       // modify the applyToChart function to fit the new chart  (by wtf)
       applyToChart(rankData) {
         const usernames = rankData.map(ele => ele.user.username)
+        const totalScores = rankData.map(ele => ele.total_score)
         const runtimes = rankData.map(ele => ele.runtime)
+        const memories = rankData.map(ele => (ele.memory / 1024 / 1024).toFixed(2))
 
         this.options.yAxis.data = usernames
-        this.options.series[0].data = runtimes
+        this.options.series[0].data = totalScores
+        this.options.series[1].data = runtimes
+        this.options.series[2].data = memories
       },
       applyToTable(data) {
         // deepcopy
