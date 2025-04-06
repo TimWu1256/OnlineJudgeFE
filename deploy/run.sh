@@ -10,7 +10,8 @@ build_vendor_dll()
   fi
 }
 cd $base
-npm install --registry=https://registry.npm.taobao.org && \
+npm install v8.12.0 && \
+nvm use 8.12.0 && \
 build_vendor_dll && \
 npm run build
 
