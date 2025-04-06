@@ -78,7 +78,7 @@
                     this.$router.push(
                       {
                         name: 'user-home',
-                        query: {username: params.row.user.username}
+                        query: { username: params.row.user.username }
                       })
                   }
                 }
@@ -94,68 +94,120 @@
                   click: () => {
                     this.$router.push({
                       name: 'contest-submission-list',
-                      query: {username: params.row.user.username}
+                      query: { username: params.row.user.username }
                     })
                   }
                 }
               }, params.row.total_score)
             }
+          },
+          // modify the table fields (by wtf)
+          {
+            title: 'Runtime (ms)',
+            align: 'center',
+            render: (h, params) => {
+              return h('a', {
+                style: { color: '#57a3f3', cursor: 'pointer' },
+                on: {
+                  click: () => {
+                    this.$router.push({
+                      name: 'submission-details',
+                      params: { id: params.row.submission_id }
+                    })
+                  }
+                }
+              }, params.row.runtime)
+            }
+          },
+          {
+            title: 'Memory (MB)',
+            align: 'center',
+            render: (h, params) => {
+                return h('a', {
+                  style: { color: '#57a3f3', cursor: 'pointer' },
+                  on: {
+                    click: () => {
+                      this.$router.push({
+                        name: 'submission-details',
+                        params: { id: params.row.submission_id }
+                      })
+                    }
+                  }
+                }, (params.row.memory / 1024 / 1024).toFixed(2))
+            }
           }
         ],
         dataRank: [],
+        // modify the chart options (by wtf)
         options: {
           title: {
-            text: this.$i18n.t('m.Top_10_Teams'),
-            left: 'center'
+            text: 'AI Contest Top 10',
+            left: 'left'
+          },
+          legend: {
+            data: [
+              'Total Score [pts]',
+              'Runtime [ms]',
+              'Memory [MB]'
+            ],
+            top: 'top',
+            selected: {
+              'Total Score [pts]': false,
+              'Runtime [ms]': true,
+              'Memory [MB]': true,
+            }
           },
           tooltip: {
-            trigger: 'axis'
-          },
-          toolbox: {
-            show: true,
-            feature: {
-              dataView: {show: true, readOnly: true},
-              magicType: {show: true, type: ['line', 'bar']},
-              saveAsImage: {show: true}
-            },
-            right: '10%'
-          },
-          calculable: true,
-          xAxis: [
-            {
-              type: 'category',
-              data: ['root'],
-              boundaryGap: true,
-              axisLabel: {
-                interval: 0,
-                showMinLabel: true,
-                showMaxLabel: true,
-                align: 'center',
-                formatter: (value, index) => {
-                  return utils.breakLongWords(value, 14)
-                }
-              },
-              axisTick: {
-                alignWithLabel: true
-              }
+            trigger: 'axis',
+            axisPointer: {
+              type: 'shadow'
             }
-          ],
-          yAxis: [
-            {
-              type: 'value'
-            }
-          ],
+          },
+          grid: {
+            left: '10%',
+            right: '10%',
+            bottom: '10%',
+            top: '20%',
+            containLabel: true
+          },
+          xAxis: {
+            type: 'value',
+            min: 0,
+          },
+          yAxis: {
+            type: 'category',
+            data: [],
+            inverse: true
+          },
           series: [
             {
-              name: this.$i18n.t('m.Score'),
+              name: 'Total Score [pts]',
               type: 'bar',
-              barMaxWidth: '80',
-              data: [0],
-              markPoint: {
-                data: [
-                  {type: 'max', name: 'max'}
-                ]
+              label: {
+                show: true,
+                position: 'right',
+                fontSize: 12,
               }
+            },
+            {
+              name: 'Runtime [ms]',
+              type: 'bar',
+              data: [],
+              label: {
+                show: true,
+                position: 'right',
+                fontSize: 12
+              },
+            },
+            {
+              name: 'Memory [MB]',
+              type: 'bar',
+              data: [],
+              label: {
+                show: true,
+                position: 'right',
+                fontSize: 12
+              },
             }
           ]
         }
@@ -174,16 +226,19 @@
     },
     methods: {
       ...mapActions(['getContestProblems']),
-      applyToChart (rankData) {
-        let [usernames, scores] = [[], []]
-        rankData.forEach(ele => {
-          usernames.push(ele.user.username)
-          scores.push(ele.total_score)
-        })
-        this.options.xAxis[0].data = usernames
-        this.options.series[0].data = scores
+      // modify the applyToChart function to fit the new chart  (by wtf)
+      applyToChart(rankData) {
+        const usernames = rankData.map(ele => ele.user.username)
+        const totalScores = rankData.map(ele => ele.total_score)
+        const runtimes = rankData.map(ele => ele.runtime)
+        const memories = rankData.map(ele => (ele.memory / 1024 / 1024).toFixed(2))
+
+        this.options.yAxis.data = usernames
+        this.options.series[0].data = totalScores
+        this.options.series[1].data = runtimes
+        this.options.series[2].data = memories
       },
-      applyToTable (data) {
+      applyToTable(data) {
         // deepcopy
         let dataRank = JSON.parse(JSON.stringify(data))
         // 从submission_info中取出相应的problem_id 放入到父object中,这么做主要是为了适应iview table的data格式
@@ -193,6 +248,9 @@
           Object.keys(info).forEach(problemID => {
             dataRank[i][problemID] = info[problemID]
           })
+          // add runtime and memory to the parent object (by wtf)
+          dataRank[i].runtime = rank.runtime
+          dataRank[i].memory = rank.memory
         })
         this.dataRank = dataRank
       },
