@@ -103,7 +103,7 @@
           },
           // modify the table fields (by wtf)
           {
-            title: 'Runtime (ms)',
+            title: 'Distance',
             align: 'center',
             render: (h, params) => {
               return h('a', {
@@ -116,24 +116,7 @@
                     })
                   }
                 }
-              }, params.row.runtime)
-            }
-          },
-          {
-            title: 'Memory (MB)',
-            align: 'center',
-            render: (h, params) => {
-                return h('a', {
-                  style: { color: '#57a3f3', cursor: 'pointer' },
-                  on: {
-                    click: () => {
-                      this.$router.push({
-                        name: 'submission-details',
-                        params: { id: params.row.submission_id }
-                      })
-                    }
-                  }
-                }, (params.row.memory / 1024 / 1024).toFixed(2))
+              }, params.row.distance)
             }
           }
         ],
@@ -146,15 +129,13 @@
           },
           legend: {
             data: [
-              'Total Score [pts]',
-              'Runtime [ms]',
-              'Memory [MB]'
+              'Total Score',
+              'Distance'
             ],
             top: 'top',
             selected: {
-              'Total Score [pts]': false,
-              'Runtime [ms]': true,
-              'Memory [MB]': true,
+              'Total Score': false,
+              'Distance': true
             }
           },
           tooltip: {
@@ -181,7 +162,7 @@
           },
           series: [
             {
-              name: 'Total Score [pts]',
+              name: 'Total Score',
               type: 'bar',
               label: {
                 show: true,
@@ -190,17 +171,7 @@
               }
             },
             {
-              name: 'Runtime [ms]',
-              type: 'bar',
-              data: [],
-              label: {
-                show: true,
-                position: 'right',
-                fontSize: 12
-              },
-            },
-            {
-              name: 'Memory [MB]',
+              name: 'Distance',
               type: 'bar',
               data: [],
               label: {
@@ -230,13 +201,11 @@
       applyToChart(rankData) {
         const usernames = rankData.map(ele => ele.user.username)
         const totalScores = rankData.map(ele => ele.total_score)
-        const runtimes = rankData.map(ele => ele.runtime)
-        const memories = rankData.map(ele => (ele.memory / 1024 / 1024).toFixed(2))
+        const distances = rankData.map(ele => ele.distance)
 
         this.options.yAxis.data = usernames
         this.options.series[0].data = totalScores
-        this.options.series[1].data = runtimes
-        this.options.series[2].data = memories
+        this.options.series[1].data = distances
       },
       applyToTable(data) {
         // deepcopy
@@ -248,9 +217,8 @@
           Object.keys(info).forEach(problemID => {
             dataRank[i][problemID] = info[problemID]
           })
-          // add runtime and memory to the parent object (by wtf)
-          dataRank[i].runtime = rank.runtime
-          dataRank[i].memory = rank.memory
+          // add distance to the parent object (by wtf)
+          dataRank[i].distance = rank.distance
         })
         this.dataRank = dataRank
       },
