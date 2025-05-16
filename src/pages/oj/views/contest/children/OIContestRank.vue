@@ -179,6 +179,12 @@
                 position: 'right',
                 fontSize: 12
               },
+              markPoint: {
+                symbolRotate: 270,
+                data: [
+                  {type: 'max', name: 'max'}
+                ]
+              }
             }
           ]
         }
