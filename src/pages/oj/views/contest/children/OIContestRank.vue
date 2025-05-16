@@ -103,7 +103,7 @@
           },
           // modify the table fields (by wtf)
           {
-            title: 'Distance',
+            title: 'Weight',
             align: 'center',
             render: (h, params) => {
               return h('a', {
@@ -116,7 +116,7 @@
                     })
                   }
                 }
-              }, params.row.distance)
+              }, params.row.weight)
             }
           }
         ],
@@ -130,12 +130,12 @@
           legend: {
             data: [
               'Total Score',
-              'Distance'
+              'Weight'
             ],
             top: 'top',
             selected: {
               'Total Score': false,
-              'Distance': true
+              'Weight': true
             }
           },
           tooltip: {
@@ -171,7 +171,7 @@
               }
             },
             {
-              name: 'Distance',
+              name: 'Weight',
               type: 'bar',
               data: [],
               label: {
@@ -201,11 +201,11 @@
       applyToChart(rankData) {
         const usernames = rankData.map(ele => ele.user.username)
         const totalScores = rankData.map(ele => ele.total_score)
-        const distances = rankData.map(ele => ele.distance)
+        const weights = rankData.map(ele => ele.weight)
 
         this.options.yAxis.data = usernames
         this.options.series[0].data = totalScores
-        this.options.series[1].data = distances
+        this.options.series[1].data = weights
       },
       applyToTable(data) {
         // deepcopy
@@ -217,10 +217,11 @@
           Object.keys(info).forEach(problemID => {
             dataRank[i][problemID] = info[problemID]
           })
-          // add distance to the parent object (by wtf)
-          dataRank[i].distance = rank.distance
+          // add weight to the parent object (by wtf)
+          dataRank[i].weight = rank.weight
         })
         this.dataRank = dataRank
+        console.log(dataRank)
       },
       addTableColumns (problems) {
         problems.forEach(problem => {
