@@ -118,7 +118,47 @@
                 }
               }, params.row.weight)
             }
-          }
+          },
+          {
+            title: 'Non Adjacent Penalty',
+            align: 'center',
+            width: 160,
+            render: (h, params) => {
+              return h('span', params.row.nonAdjacentPenalty)
+            }
+          },
+          {
+            title: 'Repeat Penalty',
+            align: 'center',
+            width: 130,
+            render: (h, params) => {
+              return h('span', params.row.repeatPenalty)
+            }
+          },
+          {
+            title: 'Missing Penalty',
+            align: 'center',
+            width: 130,
+            render: (h, params) => {
+              return h('span', params.row.missingPenalty)
+            }
+          },
+          {
+            title: 'Small Clique Penalty',
+            align: 'center',
+            width: 160,
+            render: (h, params) => {
+              return h('span', params.row.smallCliquePenalty)
+            }
+          },
+          {
+            title: 'Clique Count Penalty',
+            align: 'center',
+            width: 160,
+            render: (h, params) => {
+              return h('span', params.row.cliqueCountPenalty)
+            }
+          },
         ],
         dataRank: [],
         // modify the chart options (by wtf)
@@ -129,12 +169,12 @@
           },
           legend: {
             data: [
-              'Total Score',
+              // 'Total Score',
               'Weight'
             ],
             top: 'top',
             selected: {
-              'Total Score': false,
+              // 'Total Score': false,
               'Weight': true
             }
           },
@@ -153,23 +193,23 @@
           },
           xAxis: {
             type: 'value',
-            min: 0,
+            // min: 0,
           },
           yAxis: {
             type: 'category',
             data: [],
-            inverse: true
+            inverse: true,
           },
           series: [
-            {
-              name: 'Total Score',
-              type: 'bar',
-              label: {
-                show: true,
-                position: 'right',
-                fontSize: 12,
-              }
-            },
+            // {
+            //   name: 'Total Score',
+            //   type: 'bar',
+            //   label: {
+            //     show: true,
+            //     position: 'right',
+            //     fontSize: 12,
+            //   }
+            // },
             {
               name: 'Weight',
               type: 'bar',
@@ -206,12 +246,12 @@
       // modify the applyToChart function to fit the new chart  (by wtf)
       applyToChart(rankData) {
         const usernames = rankData.map(ele => ele.user.username)
-        const totalScores = rankData.map(ele => ele.total_score)
+        // const totalScores = rankData.map(ele => ele.total_score)
         const weights = rankData.map(ele => ele.weight)
 
         this.options.yAxis.data = usernames
-        this.options.series[0].data = totalScores
-        this.options.series[1].data = weights
+        // this.options.series[0].data = weights
+        this.options.series[0].data = weights
       },
       applyToTable(data) {
         // deepcopy
@@ -223,11 +263,15 @@
           Object.keys(info).forEach(problemID => {
             dataRank[i][problemID] = info[problemID]
           })
-          // add weight to the parent object (by wtf)
+          // add weight and penalties to the parent object (by wtf)
           dataRank[i].weight = rank.weight
+          dataRank[i].nonAdjacentPenalty = rank.penalties["nonAdjacentPenalty"]
+          dataRank[i].repeatPenalty = rank.penalties["repeatPenalty"]
+          dataRank[i].missingPenalty = rank.penalties["missingPenalty"]
+          dataRank[i].smallCliquePenalty = rank.penalties["smallCliquePenalty"]
+          dataRank[i].cliqueCountPenalty = rank.penalties["cliqueCountPenalty"]
         })
         this.dataRank = dataRank
-        console.log(dataRank)
       },
       addTableColumns (problems) {
         problems.forEach(problem => {
