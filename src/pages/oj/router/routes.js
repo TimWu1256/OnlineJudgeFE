@@ -84,7 +84,12 @@ export default [
       {
         name: 'contest-submission-list',
         path: 'submissions',
-        component: SubmissionList
+        component: Contest.ContestSubmissionList
+      },
+      {
+        name: 'contest-submission-details',
+        path: 'status/:id/',
+        component: Contest.ContestSubmissionDetails
       },
       {
         name: 'contest-problem-list',
@@ -94,7 +99,7 @@ export default [
       {
         name: 'contest-problem-details',
         path: 'problem/:problemID/',
-        component: Problem
+        component: Contest.ContestProblem
       },
       {
         name: 'contest-announcement-list',

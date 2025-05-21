@@ -103,62 +103,56 @@
           },
           // modify the table fields (by wtf)
           {
-            title: 'Weight',
+            title: 'Average Weight',
             align: 'center',
+            // width: 180,
             render: (h, params) => {
               return h('a', {
                 style: { color: '#57a3f3', cursor: 'pointer' },
                 on: {
                   click: () => {
                     this.$router.push({
-                      name: 'submission-details',
+                      // name: 'submission-details',
+                      name: 'contest-submission-details',
                       params: { id: params.row.submission_id }
                     })
                   }
                 }
-              }, params.row.weight)
+              }, params.row.average_weight)
             }
           },
-          {
-            title: 'Non Adjacent Penalty',
-            align: 'center',
-            width: 160,
-            render: (h, params) => {
-              return h('span', params.row.nonAdjacentPenalty)
-            }
-          },
-          {
-            title: 'Repeat Penalty',
-            align: 'center',
-            width: 130,
-            render: (h, params) => {
-              return h('span', params.row.repeatPenalty)
-            }
-          },
-          {
-            title: 'Missing Penalty',
-            align: 'center',
-            width: 130,
-            render: (h, params) => {
-              return h('span', params.row.missingPenalty)
-            }
-          },
-          {
-            title: 'Small Clique Penalty',
-            align: 'center',
-            width: 160,
-            render: (h, params) => {
-              return h('span', params.row.smallCliquePenalty)
-            }
-          },
-          {
-            title: 'Clique Count Penalty',
-            align: 'center',
-            width: 160,
-            render: (h, params) => {
-              return h('span', params.row.cliqueCountPenalty)
-            }
-          },
+          // {
+          //   title: 'Non Adjacent Pair',
+          //   align: 'center',
+          //   width: 160,
+          //   render: (h, params) => {
+          //     return h('span', params.row.nonAdjacentPair)
+          //   }
+          // },
+          // {
+          //   title: 'Repeat Node',
+          //   align: 'center',
+          //   width: 130,
+          //   render: (h, params) => {
+          //     return h('span', params.row.repeatNode)
+          //   }
+          // },
+          // {
+          //   title: 'Missing Node',
+          //   align: 'center',
+          //   width: 130,
+          //   render: (h, params) => {
+          //     return h('span', params.row.missingNode)
+          //   }
+          // },
+          // {
+          //   title: 'Clique Size Violation',
+          //   align: 'center',
+          //   width: 160,
+          //   render: (h, params) => {
+          //     return h('span', params.row.cliqueSize)
+          //   }
+          // }
         ],
         dataRank: [],
         // modify the chart options (by wtf)
@@ -192,13 +186,11 @@
             containLabel: true
           },
           xAxis: {
-            type: 'value',
-            // min: 0,
+            type: 'category',
+            data: []
           },
           yAxis: {
-            type: 'category',
-            data: [],
-            inverse: true,
+            type: 'value'
           },
           series: [
             // {
@@ -218,12 +210,6 @@
                 show: true,
                 position: 'right',
                 fontSize: 12
-              },
-              markPoint: {
-                symbolRotate: 270,
-                data: [
-                  {type: 'max', name: 'max'}
-                ]
               }
             }
           ]
@@ -246,12 +232,26 @@
       // modify the applyToChart function to fit the new chart  (by wtf)
       applyToChart(rankData) {
         const usernames = rankData.map(ele => ele.user.username)
-        // const totalScores = rankData.map(ele => ele.total_score)
-        const weights = rankData.map(ele => ele.weight)
+        const averageWeights = rankData.map(ele => ele.average_weight)
 
-        this.options.yAxis.data = usernames
-        // this.options.series[0].data = weights
-        this.options.series[0].data = weights
+        this.options.xAxis.data = usernames
+        this.options.series[0].data = averageWeights
+
+        // 動態設置 markPoint 讓標記在第一名 bar 頂端
+        this.options.series[0].markPoint = {
+          // symbolRotate: 180,
+          data: [
+            {
+              coord: [0, averageWeights[0]],
+              name: 'Top 1',
+              value: averageWeights[0],
+              label: {
+                show: true,
+                formatter: 'Top 1'
+              }
+            }
+          ]
+        }
       },
       applyToTable(data) {
         // deepcopy
@@ -264,12 +264,11 @@
             dataRank[i][problemID] = info[problemID]
           })
           // add weight and penalties to the parent object (by wtf)
-          dataRank[i].weight = rank.weight
-          dataRank[i].nonAdjacentPenalty = rank.penalties["nonAdjacentPenalty"]
-          dataRank[i].repeatPenalty = rank.penalties["repeatPenalty"]
-          dataRank[i].missingPenalty = rank.penalties["missingPenalty"]
-          dataRank[i].smallCliquePenalty = rank.penalties["smallCliquePenalty"]
-          dataRank[i].cliqueCountPenalty = rank.penalties["cliqueCountPenalty"]
+          dataRank[i].average_weight = rank.average_weight
+          // dataRank[i].nonAdjacentPair = rank.violations["nonAdjacentPair"]
+          // dataRank[i].repeatNode = rank.violations["repeatNode"]
+          // dataRank[i].missingNode = rank.violations["missingNode"]
+          // dataRank[i].cliqueSize = rank.violations["cliqueSize"]
         })
         this.dataRank = dataRank
       },

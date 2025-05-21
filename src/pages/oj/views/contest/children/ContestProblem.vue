@@ -62,7 +62,12 @@
             <div class="status" v-if="statusVisible">
               <template v-if="!this.contestID || (this.contestID && OIContestRealTimePermission)">
                 <span>{{$t('m.Status')}}</span>
-                <Tag type="dot" :color="submissionStatus.color" @click.native="handleRoute('/status/'+submissionId)">
+                <!-- <Tag type="dot" :color="submissionStatus.color" @click.native="handleRoute('/status/'+submissionId)"> -->
+                <Tag
+                  type="dot"
+                  :color="submissionStatus.color"
+                  @click.native="$router.push({ name: 'contest-submission-details', params: { contestID: contestID, id: submissionId } })"
+                >
                   {{$t('m.' + submissionStatus.text.replace(/ /g, "_"))}}
                 </Tag>
               </template>
@@ -200,13 +205,15 @@
 
 <script>
   import {mapGetters, mapActions} from 'vuex'
-  import {types} from '../../../../store'
+  // import {types} from '../../../../store'
+  import {types} from '@/store'
   import CodeMirror from '@oj/components/CodeMirror.vue'
   import storage from '@/utils/storage'
   import {FormMixin} from '@oj/components/mixins'
   import {JUDGE_STATUS, CONTEST_STATUS, buildProblemCodeKey} from '@/utils/constants'
   import api from '@oj/api'
-  import {pie, largePie} from './chartData'
+  // import {pie, largePie} from './chartData'
+  import {pie, largePie} from '@/pages/oj/views/problem/chartData'
 
   // 只显示这些状态的图形占用
   const filtedStatus = ['-1', '-2', '0', '1', '2', '3', '4', '8']
